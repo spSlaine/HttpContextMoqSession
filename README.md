@@ -10,13 +10,15 @@ When setting up your mock objects you can not intercept extension methods. So wh
 * GetString(string key)
 * Get(string key)
 
-If you do you get the following error message
+If you do try to use one of these methods you will get a ```NotSupportedException``` exception, example shown below.
 
-> System.NotSupportedException : Unsupported expression: x => x.Get(string key)
-> 
-> Extension methods (here: SessionExtensions.Get) may not be used in setup / verification expressions.
+> ```
+> System.NotSupportedException
+> Unsupported expression: session => session.GetString("Name")
+> Extension methods (here: SessionExtensions.GetString) may not be used in setup / verification expressions.
+> ```
 
-If you are wanting to setup the return values for various keys then you have to setup calls to the ```ISession.TryGetValue(key, out byte[]? value)``` method.
+If you are wanting to setup the return values for various keys then you have to setup calls to the ```ISession.TryGetValue(key, out byte[]? value)``` method rather than the ```GetString(key)```, ```GetInt32(key)``` or even ```Get(key)``` methods which all eventually call ```TryGetValue()```.
 
 ``` csharp
 using System.Text;
@@ -143,7 +145,8 @@ context.FeaturesMock.Mock.Setup(collection => collection.Get<ISessionFeature>())
 
 ```
 
-You can then just use the HttpContextMock.Session object as normal
+You can then just use the HttpContextMock.Session object as normal. 
+> NOTE: This isn't a great test as all we are testing here is that the test implementation of ISession is working. But I hope you get the point.
 
 ```csharp
 using System.Text;
@@ -164,7 +167,13 @@ namespace HttpContextMoqSessionTest
         {
             // Arrange
             var context = new HttpContextMock();
-            context.SetupInMemorySession();
+
+            var inMemorySession = new InMemorySession();
+            context.Session = inMemorySession;
+            context.FeaturesMock.Mock.Setup(collection => collection.Get<ISessionFeature>()).Returns((ISessionFeature)new SessionFeatureFake()
+            {
+                Session = inMemorySession
+            });
            
             const string name = "Mike";
             const int age = 32;

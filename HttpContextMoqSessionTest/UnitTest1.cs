@@ -12,6 +12,27 @@ namespace HttpContextMoqSessionTest
         const string AgeKey = "Age";
 
         [Fact]
+        public void Test0()
+        {
+            // Arrange
+            var context = new HttpContextMock();
+            context.SetupSession();
+
+            const string name = "Mike";
+
+
+            var ex = Assert.Throws<NotSupportedException>(() => context.SessionMock.Mock.Setup(session => session.GetString(NameKey)).Returns(name));
+
+            // Act
+
+
+            // Assert
+
+            Assert.StartsWith("Unsupported expression: session => session.GetString(\"Name\")", ex.Message);
+        }
+
+
+        [Fact]
         public void Test1()
         {
             // Arrange
