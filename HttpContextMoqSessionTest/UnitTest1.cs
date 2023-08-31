@@ -58,7 +58,7 @@ namespace HttpContextMoqSessionTest
 
             // Assert
             context.Session.GetString(NameKey).ShouldBe(name);
-            context.Session.GetInt32(AgeKey).ShouldBe(32);
+            context.Session.GetInt32(AgeKey).ShouldBe(age);
         }
     }
 }
